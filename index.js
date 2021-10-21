@@ -1,5 +1,5 @@
-const chalk = require("chalk");
-const fs = require("fs");
+const chalk = require('chalk');
+const fs = require('fs');
 
 let startDay = 1;
 let endDay = 25;
@@ -23,31 +23,24 @@ const timed = fn => {
 const showTestResult = (day, part, expected, actual, duration) => {
   const durationDesc = chalk.blue(` (${duration}ms)`);
   if (actual === expected) {
-    console.log(
-      chalk.green(`day ${day} part ${part}: ${actual}`) + durationDesc
-    );
+    console.log(chalk.green(`day ${day} part ${part}: ${actual}`) + durationDesc);
   } else {
-    console.log(
-      chalk.red(
-        `day ${day} part ${part}: ${actual} - expected ${expected}` +
-          durationDesc
-      )
-    );
+    console.log(chalk.red(`day ${day} part ${part}: ${actual} - expected ${expected}` + durationDesc));
   }
 };
 
 for (let day = startDay; day <= endDay; day++) {
-  const path = `./${("0" + day).slice(-2)}`;
+  const path = `./${('0' + day).slice(-2)}`;
   if (!fs.existsSync(path)) {
-    console.log(chalk.red(`${year} day ${day} not found`));
+    console.log(chalk.red(`day ${day} not found`));
     break;
   }
   const solver = require(path + `/solve`);
   const text = fs
     .readFileSync(path + `/input.txt`)
     .toString()
-    .split("\n")
-    .map(s => s.replace(/\r$/, ""))
+    .split('\n')
+    .map(s => s.replace(/\r$/, ''))
     .filter(s => s.length > 0);
   for (let part of [1, 2]) {
     const expected = solver.expected(part);
