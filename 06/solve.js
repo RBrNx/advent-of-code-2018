@@ -1,24 +1,11 @@
-const { findClosestLocations, calculateLocationArea } = require('./helpers');
+const { parseCoordinates, findClosestLocations, totalManhattanDist, calculateLocationArea } = require('./helpers');
 
 const partOne = input => {
-  let [mapWidth, mapHeight] = [0, 0];
-  const coordinates = input.map(line => {
-    const [x, y] = line.split(', ').map(Number);
-
-    if (x >= mapWidth) mapWidth = x + 1;
-    if (y >= mapHeight) mapHeight = y + 1;
-
-    return { x, y };
-  });
+  const { coordinates, mapWidth, mapHeight } = parseCoordinates(input);
 
   const twoDimensionalMap = Array(mapHeight)
     .fill(null)
     .map(() => Array(mapWidth).fill('.'));
-
-  // eslint-disable-next-line array-callback-return
-  coordinates.map(({ x, y }, index) => {
-    twoDimensionalMap[y][x] = index;
-  });
 
   for (let y = 0; y < mapHeight; y += 1) {
     for (let x = 0; x < mapWidth; x += 1) {
@@ -49,10 +36,31 @@ const partOne = input => {
   return area;
 };
 
-const partTwo = input => {};
+const partTwo = input => {
+  const maximumDistance = 10000;
+  const { coordinates, mapWidth, mapHeight } = parseCoordinates(input);
+
+  const twoDimensionalMap = Array(mapHeight)
+    .fill(null)
+    .map(() => Array(mapWidth).fill('.'));
+
+  for (let y = 0; y < mapHeight; y += 1) {
+    for (let x = 0; x < mapWidth; x += 1) {
+      const totalDist = totalManhattanDist({ x, y }, coordinates);
+
+      if (totalDist < maximumDistance) twoDimensionalMap[y][x] = '#';
+    }
+  }
+
+  const totalArea = twoDimensionalMap.reduce((acc, curr) => acc + curr.filter(x => x === '#').length, 0);
+
+  console.log(`Largest Area is ${totalArea}`);
+
+  return totalArea;
+};
 
 const solve = (input, part) => (part === 1 ? partOne(input) : partTwo(input));
 
-const expected = part => (part === 1 ? 5035 : 141071);
+const expected = part => (part === 1 ? 5035 : 35294);
 
 module.exports = { solve, expected };
