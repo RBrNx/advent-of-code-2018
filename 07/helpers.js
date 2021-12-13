@@ -7,7 +7,7 @@ const parseInstructions = input =>
     return [...acc, [stepLetter, requiresStepLetter]];
   }, []);
 
-const calculateNextStep = instructions => {
+const calculatePossibleSteps = instructions => {
   const possibleSteps = new Set();
   const availableSteps = instructions.map(([step]) => step);
   const requirements = instructions.map(([_step, requirement]) => requirement);
@@ -18,9 +18,24 @@ const calculateNextStep = instructions => {
     }
   });
 
-  const [nextStep] = Array.from(possibleSteps).sort();
+  return Array.from(possibleSteps).sort();
+};
+
+const calculateNextStep = instructions => {
+  const possibleSteps = calculatePossibleSteps(instructions);
+
+  const [nextStep] = possibleSteps;
 
   return nextStep;
+};
+
+const calculateLastStep = instructions => {
+  const availableSteps = instructions.map(([step]) => step);
+  const requirements = instructions.map(([_step, requirement]) => requirement);
+
+  const lastStep = requirements.find(requirement => !availableSteps.includes(requirement));
+
+  return lastStep;
 };
 
 const processStep = (step, order, instructions) => {
@@ -32,19 +47,22 @@ const processStep = (step, order, instructions) => {
     return acc;
   }, []);
 
-  let updatedOrder = order;
-  if (instructions.length > 1) {
-    updatedOrder += step;
-  } else {
-    const [penultimateStep, lastStep] = instructions[0];
-    updatedOrder += penultimateStep + lastStep;
-  }
+  // const updatedOrder = order;
+  // if (instructions.length > 1) {
+  //   updatedOrder += step;
+  // }
+  // } else {
+  //   const [penultimateStep, lastStep] = instructions[0];
+  //   updatedOrder += penultimateStep + lastStep;
+  // }
 
-  return { instructionOrder: updatedOrder, instructions: updatedInstructions };
+  return { instructionOrder: order + step, instructions: updatedInstructions };
 };
 
 module.exports = {
   parseInstructions,
+  calculatePossibleSteps,
   calculateNextStep,
+  calculateLastStep,
   processStep,
 };
