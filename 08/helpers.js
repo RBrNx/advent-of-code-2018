@@ -10,6 +10,21 @@ class Node {
 
     return localTotal + childrenTotal;
   }
+
+  calculateNodeValue() {
+    if (!this.children.length) {
+      return this.metadata.reduce((acc, curr) => acc + curr, 0);
+    }
+
+    return this.metadata.reduce((acc, curr) => {
+      const child = this.children[curr - 1];
+      if (child) {
+        return acc + child.calculateNodeValue();
+      }
+
+      return acc;
+    }, 0);
+  }
 }
 
 const getHeaderBytes = licence => licence.splice(0, 2);
