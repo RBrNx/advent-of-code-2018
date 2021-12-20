@@ -1,53 +1,76 @@
-const findRelativeMarbleIndex = (currIndex, position, circleSize, { counterClockwise = false } = {}) => {
-  if (circleSize === 1) return 1;
-
-  let nextIndex = currIndex;
-
-  if (counterClockwise) {
-    for (let counter = 0; counter < position; counter += 1) {
-      if (nextIndex - 1 >= 0) nextIndex -= 1;
-      else nextIndex = circleSize - 1;
-    }
-  } else {
-    for (let counter = 0; counter < position; counter += 1) {
-      if (nextIndex + 1 < circleSize) nextIndex += 1;
-      else nextIndex = 0;
-    }
+class Marble {
+  constructor(value, next = null, prev = null) {
+    this.value = value;
+    this.clockwise = next;
+    this.counterClockwise = prev;
   }
 
-  return nextIndex;
-};
+  insertMarble(value) {
+    const clockwiseMarble = this.clockwise;
+    const followingMarble = clockwiseMarble.clockwise;
+
+    const newMarble = new Marble(value, followingMarble, clockwiseMarble);
+
+    followingMarble.counterClockwise = newMarble;
+    clockwiseMarble.clockwise = newMarble;
+
+    return newMarble;
+  }
+
+  removeMarble(relativePosition, { counterClockwise = false } = {}) {
+    let relativeMarble = this;
+    const direction = counterClockwise ? 'counterClockwise' : 'clockwise';
+
+    for (let counter = 0; counter < relativePosition; counter += 1) {
+      relativeMarble = relativeMarble[direction];
+    }
+
+    const nextMarble = relativeMarble.clockwise;
+    const previousMarble = relativeMarble.counterClockwise;
+
+    nextMarble.counterClockwise = previousMarble;
+    previousMarble.clockwise = nextMarble;
+
+    return relativeMarble;
+  }
+
+  printCircle() {
+    const startingValue = this.value;
+    let marble = this.clockwise;
+    const circleValues = [this.value];
+
+    while (marble.value !== startingValue) {
+      circleValues.push(marble.value);
+      marble = marble.clockwise;
+    }
+
+    return circleValues;
+  }
+}
 
 const playMarbleGame = (numPlayers, highestMarbleValue) => {
   let finished = false;
   let lastMarblePlayed = 0;
-  let currentMarble = 0;
-  const circle = [0];
+  let currentMarble = new Marble(0);
+  currentMarble.clockwise = currentMarble;
+  currentMarble.counterClockwise = currentMarble;
   const scores = new Array(numPlayers).fill(0);
 
   while (!finished) {
     for (let player = 0; player < numPlayers; player += 1) {
-      const nextMarble = lastMarblePlayed + 1;
-      // eslint-disable-next-line no-loop-func
-      const currentMarbleIndex = circle.findIndex(m => m === currentMarble);
-
-      if (nextMarble > highestMarbleValue) {
+      const nextValue = lastMarblePlayed + 1;
+      if (nextValue > highestMarbleValue) {
         finished = true;
         break;
       }
 
-      if (nextMarble % 23 === 0) {
-        scores[player] += nextMarble;
-        const removeMarbleIndex = findRelativeMarbleIndex(currentMarbleIndex, 7, circle.length, {
-          counterClockwise: true,
-        });
-        const [removedPoints] = circle.splice(removeMarbleIndex, 1);
-        scores[player] += removedPoints;
-        currentMarble = circle[removeMarbleIndex];
+      if (nextValue % 23 === 0) {
+        const removedMarble = currentMarble.removeMarble(7, { counterClockwise: true });
+        scores[player] += nextValue + removedMarble.value;
+        currentMarble = removedMarble.clockwise;
       } else {
-        const nextMarbleIndex = findRelativeMarbleIndex(currentMarbleIndex, 2, circle.length);
-        circle.splice(nextMarbleIndex, 0, nextMarble);
-        currentMarble = nextMarble;
+        const newMarble = currentMarble.insertMarble(lastMarblePlayed + 1);
+        currentMarble = newMarble;
       }
 
       lastMarblePlayed += 1;
@@ -59,4 +82,4 @@ const playMarbleGame = (numPlayers, highestMarbleValue) => {
   return highestScore;
 };
 
-module.exports = { findRelativeMarbleIndex, playMarbleGame };
+module.exports = { playMarbleGame };
