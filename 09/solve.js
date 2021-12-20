@@ -7,7 +7,11 @@ const partOne = input => {
   return highestScore;
 };
 
-const partTwo = input => {};
+const partTwo = input => {
+  const [NUM_PLAYERS, HIGHEST_MARBLE_VALUE] = input[0].match(/\d+/g).map(Number);
+  const highestScore = playMarbleGame(NUM_PLAYERS, HIGHEST_MARBLE_VALUE * 100);
+  return highestScore;
+};
 
 const solve = (input, part) => (part === 1 ? partOne(input) : partTwo(input));
 
